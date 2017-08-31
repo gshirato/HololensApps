@@ -1,0 +1,61 @@
+Option Explicit
+Option Private Module
+'Photo
+
+Public Sub Photos(pName, pPath, nRow)
+
+    Call initPhotos
+    
+    Select Case LCase(Mid(pName, InStrRev(pName, ".")))
+        Case ".bmp", ".ico", ".rle", ".wmf", ".emf", ".gif", ".jpg"
+            Call Photo_c(pName, pPath, nRow)
+            
+        Case ".tif", ".png"
+            Call Photo_else(pName, pPath, nRow)
+        
+        Case Else
+            
+    End Select
+    
+    
+End Sub
+Sub initPhotos()
+    Dim shp As Shape
+    For Each shp In Sheets("Photos").Shapes
+        If shp.Type = msoPicture Then
+            shp.Delete
+        ElseIf shp.Type = msoLinkedPicture Then
+            shp.Delete
+        End If
+        
+    Next shp
+    
+End Sub
+
+Sub Photo_c(pictureName, picturePath, nRow)
+    Dim fullpathPicture As String
+    Dim Photo As Object
+
+    If pictureName = "False" Then Exit Sub
+    fullpathPicture = picturePath & pictureName
+    Set Photo = LoadPicture(fullpathPicture)
+     Cells(nRow, 6) = CLng(Photo.Width * 24 / 635)
+     Cells(nRow, 7) = CLng(Photo.Height * 24 / 635)
+    
+End Sub
+Sub Photo_else(pictureName, picturePath, nRow)
+
+    Dim Photo As Object
+    Dim fullpathPicture As String
+    
+    fullpathPicture = picturePath & pictureName
+    Sheets("Photos").Pictures.Insert fullpathPicture
+
+    With Sheets("Photos").Pictures(1)
+            Cells(nRow, 6) = CLng(.Width * 4 / 3)
+            Cells(nRow, 7) = CLng(.Height * 4 / 3)
+    End With
+    
+
+End Sub
+
