@@ -1,0 +1,67 @@
+Option Explicit
+
+
+
+
+Private Sub CommandButton2_Click()
+ Unload Me
+End Sub
+
+Sub clearContents()
+    Me.idTxt.Value = ""
+    titleTxt = ""
+    descriptionTxt = ""
+    imgTxt = ""
+    txtStart = ""
+End Sub
+
+Private Sub registerBtn_Click()
+Dim i As Integer
+        If Trim(idTxt.Value) = "" Or Trim(titleTxt.Value) = "" Or Trim(descriptionTxt.Value) = "" Or Trim(imgTxt.Value) = "" Then
+             MsgBox ("Form is not completed !")
+        Else
+            If Range("B2") = "" Then
+                Dim j As Integer
+                Dim IsCompleted As Boolean
+                
+            
+                        Cells(2, 2) = idTxt.Value
+                        Cells(2, 3) = titleTxt.Value
+                        Cells(2, 4) = descriptionTxt.Value
+                        Cells(2, 5) = imgTxt.Value
+                        Cells(2, 6) = txtStart.Value
+            Else
+            
+                    i = Range("B1").End(xlDown).Row + 1
+                    
+                    Cells(i, 2) = idTxt.Value
+                    Cells(i, 3) = titleTxt.Value
+                    Cells(i, 4) = descriptionTxt.Value
+                    Cells(i, 5) = imgTxt.Value
+                    Cells(i, 6) = txtStart.Value
+                    
+            End If
+
+        End If
+    clearContents
+    idTxt.SetFocus
+End Sub
+
+
+Private Sub txtStart_Change()
+
+End Sub
+
+Private Sub UserForm_Initialize()
+    'Left
+    Me.idTxt.Left = 50
+    Me.titleTxt.Left = 50
+    Me.descriptionTxt.Left = 50
+    Me.imgTxt.Left = 50
+    
+    'Height
+     Me.idTxt.Height = 15
+    Me.titleTxt.Height = 15
+    Me.descriptionTxt.Height = 15
+    Me.imgTxt.Height = 15
+End Sub
