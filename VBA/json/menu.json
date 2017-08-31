@@ -1,0 +1,16 @@
+{
+	"trainings": [
+		{
+			"id": "fourchette",
+			"title": "Guide Utilisateur Fourchette",
+			"description": "Comment utiliser une fourchette efficacement ?\r\nDur�e: 5 minutes.",
+			"image": "fourchette-animee-small.gif"
+		},
+		{
+			"id": "fourchette_classique",
+			"title": "fourchette_classique",
+			"description": "fourchette classique",
+			"image": "image_fourchette.png"
+		}
+	]
+}
