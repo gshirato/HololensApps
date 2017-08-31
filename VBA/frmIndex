@@ -1,0 +1,187 @@
+Option Explicit
+
+
+Private Sub btnClear_Click()
+    Call initializeForm
+End Sub
+
+Private Sub btnEnter_Click()
+        If Trim(Me.txtTitle) <> "" And Trim(Me.txtName) <> "" And Trim(Me.txtID) <> "" Then
+    
+        Dim title, sheetName As String
+        Dim ws, worksh As Worksheet
+        Dim i, actualRow As Integer
+      
+        For i = 1 To 30
+            sheetName = "Training" & i & "(" & Me.cmbID.Value & ")"
+            For Each worksh In Worksheets
+                If worksh.Name = sheetName Then
+                    Set ws = Worksheets(sheetName)
+                End If
+            Next
+        Next
+       
+        With ws
+            actualRow = .Range("A1").End(xlDown).Row + 1
+            .Cells(actualRow, 1) = actualRow - 3
+            .Cells(actualRow, 2) = Me.txtID.Value
+            .Cells(actualRow, 3) = Me.txtTitle.Value
+            .Cells(actualRow, 4) = Me.txtDescription.Value
+            .Cells(actualRow, 5) = Me.cmbType.Value
+            .Cells(actualRow, 6) = Me.txtName.Value
+            .Cells(actualRow, 7) = Me.txtAudio.Value
+            .Cells(actualRow, 8) = Me.txtDuration.Value
+            If Me.btnSimple = True Then
+                
+                .Cells(actualRow, 9) = "Simple"
+                .Cells(actualRow, 11) = Me.txtChoice1.Value
+             Else
+                .Cells(actualRow, 9) = "Option"
+                .Cells(actualRow, 10) = Me.txtNextTitle.Value
+                .Cells(actualRow, 11) = Me.txtChoice1.Value
+                .Cells(actualRow, 12) = Me.txtChoice2.Value
+                .Cells(actualRow, 13) = Me.txtChoice3.Value
+             End If
+        End With
+        Call initializeForm
+        cmbID.SetFocus
+    Else
+    MsgBox ("Please complete the form")
+    
+    End If
+End Sub
+
+Sub initializeForm()
+    With Me
+        .cmbID.Value = ""
+        .txtID.Value = ""
+        .txtTitle.Value = ""
+        .txtDescription.Value = ""
+        .cmbType.Value = ""
+        .txtName.Value = ""
+        .txtAudio.Value = ""
+        .txtDuration.Value = 30
+        .txtChoice1 = ""
+        .txtChoice2 = ""
+        .txtChoice3 = ""
+        
+    End With
+End Sub
+
+
+
+
+
+Private Sub cmbType_Change()
+    If Me.cmbType.Value = "video" Or Me.cmbType.Value = "video360" Then
+        Me.txtAudio.Enabled = False
+        Me.txtAudio.BackColor = &H80000008
+        Me.txtAudio.Value = ""
+    Else
+        Me.txtAudio.Enabled = True
+        Me.txtAudio.BackColor = &H8000000E
+    End If
+    
+End Sub
+
+
+Private Sub btnSimple_Click()
+    Me.txtNextTitle.Enabled = False
+    Me.txtNextTitle.BackColor = &H80000008
+    Me.txtChoice1.Enabled = True
+    Me.txtChoice1.BackColor = &H8000000E
+    Me.txtChoice2.Enabled = False
+    Me.txtChoice2.BackColor = &H80000008
+     Me.txtChoice3.Enabled = False
+    Me.txtChoice3.BackColor = &H80000008
+    Me.txtChoice3.Value = ""
+End Sub
+Private Sub btnOption_Click()
+    Me.txtNextTitle.Enabled = True
+    Me.txtNextTitle.BackColor = &H8000000E
+    Me.txtChoice1.Enabled = True
+    Me.txtChoice1.BackColor = &H8000000E
+    Me.txtChoice2.Enabled = True
+    Me.txtChoice2.BackColor = &H8000000E
+    Me.txtChoice3.Enabled = True
+    Me.txtChoice3.BackColor = &H8000000E
+End Sub
+
+
+
+Private Sub OptionButton2_Click()
+    Me.butAddOption.Enabled = True
+End Sub
+
+Private Sub scbDuration_Change()
+    txtDuration.Value = scbDuration.Value
+End Sub
+Private Sub txtDuration_Change()
+    If txtDuration.Value = "" Then
+        
+    ElseIf txtDuration.Value > scbDuration.Max Then
+        scbDuration.Value = scbDuration.Max
+     ElseIf txtDuration.Value < scbDuration.Min Then
+        scbDuration.Value = scbDuration.Min
+    Else
+        scbDuration.Value = txtDuration.Value
+    
+    End If
+    
+End Sub
+
+
+Private Sub txtID_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+
+    If Trim(Me.txtTitle.Value) = "" Then
+        Me.txtTitle.Value = StrConv(Me.txtID.Value, vbProperCase)
+    End If
+    
+     If Trim(Me.txtName.Value) = "" Then
+        Me.txtName.Value = Me.txtID.Value
+    End If
+        
+    If Trim(Me.txtAudio.Value) = "" Then
+        Me.txtAudio.Value = Me.txtID.Value
+    End If
+    
+End Sub
+
+Private Sub UserForm_Initialize()
+    Dim actvSheet As Worksheet
+    Dim AppNum, i As Integer
+    Set actvSheet = Sheets("Menu2")
+    AppNum = actvSheet.Range("B1").End(xlDown).Row - 1
+    Call addType
+    For i = 1 To AppNum
+        Me.cmbID.AddItem Cells(i + 1, 2)
+    Next
+    
+    Call Configuration_ScrollBar
+    Call Configuration_Button
+    
+End Sub
+Sub Configuration_Button()
+    Me.btnSimple.Value = True
+    Me.txtChoice1.Enabled = True
+    Me.txtChoice1.BackColor = &H8000000E
+     Me.txtChoice2.Enabled = False
+    Me.txtChoice2.BackColor = &H80000008
+    Me.txtChoice3.Enabled = False
+    Me.txtChoice3.BackColor = &H80000008
+End Sub
+Sub Configuration_ScrollBar()
+    Me.scbDuration.Max = 600
+    Me.scbDuration.Min = 0
+End Sub
+Sub addType()
+    Me.cmbType.AddItem "image"
+    Me.cmbType.AddItem "video"
+    Me.cmbType.AddItem "image360"
+    Me.cmbType.AddItem "video360"
+    Me.cmbType.AddItem "text"
+    Me.cmbType.AddItem "quiz"
+    Me.cmbType.AddItem "bundle"
+    Me.cmbType.AddItem "fbx"
+    
+End Sub
