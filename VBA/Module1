@@ -1,0 +1,532 @@
+' Created By Gota Shirato (Johnson Controls Industries)
+' Modified on 15th June 2017
+' [Goal]: To Create .json files from the icons
+
+
+Option Explicit
+
+'Button                             "
+Sub SetDir()
+    Call InitFolder
+    Call MakeDir
+    Call CreateFolders
+End Sub
+
+Sub InitFolder()
+    Dim folderPath As String
+    Dim folderName As String
+    Dim FSO As Object
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    
+    folderPath = ThisWorkbook.Path
+    folderName = folderPath & "\test\Data"
+    
+    If Dir(folderName, vbDirectory) <> "" Then
+         FSO.deletefolder folderName
+    Else
+    
+    End If
+    
+    Set FSO = Nothing
+
+End Sub
+
+Sub MakeDir()
+    Dim folderPath As String
+    Dim folderName As String
+    
+    folderPath = ThisWorkbook.Path
+    folderName = folderPath & "\test\Data"
+    
+    If Dir(folderName, vbDirectory) = "" Then
+        MkDir folderName
+    Else
+    
+    End If
+    
+    
+End Sub
+
+Sub CreateFolders()
+    Dim NumProjects As Variant
+    Dim folderName As String
+    
+    NumProjects = InputBox("How many projects do you want to make? (Max: 25)", _
+    title:="Number Of Projects", Default:=5)
+    
+    If IsNumeric(NumProjects) Then
+    Dim i As Integer
+        For i = 1 To NumProjects
+        folderName = ThisWorkbook.Path & "\test\Data\Project " & i
+        MkDir folderName
+        Call CreateFolder(folderName, "movies")
+        Call CreateFolder(folderName, "photos")
+        Call CreateFolder(folderName, "musics")
+        Call CreateFolder(folderName, "models")
+        Call CreateFolder(folderName, "texts")
+        Call CreateFolder(folderName, "json")
+        Next
+        
+    
+    End If
+End Sub
+
+
+Sub CreateFolder(parentFolderName, childFolderName)
+
+        Dim openFileName As String
+        
+        openFileName = parentFolderName + "\" + childFolderName
+        MkDir openFileName
+
+End Sub
+
+' Clear All data in the activated sheet
+Sub CleanCells()
+    Cells.Clear
+End Sub
+
+Sub InitSheets()
+    Dim Sheet As Worksheet
+
+    For Each Sheet In Sheets
+        If Sheet.Name <> "Menu" Then
+            If Sheet.Name <> "Photos" Then
+                Sheet.Delete
+            End If
+        End If
+    Next
+End Sub
+
+Sub GenerateFiles()
+    Application.ScreenUpdating = False
+    
+    Application.DisplayAlerts = False
+    Call InitSheets
+    ActiveWorkbook.Save
+    Application.DisplayAlerts = True
+    
+    Dim CurrentWS, MenuSheet As Worksheet
+    Dim trainingFolder As String
+    Dim i, AppNum As Integer
+    
+    Set MenuSheet = Sheets("Menu")
+    i = 2
+    trainingFolder = ReadFolder
+    Do While trainingFolder <> ""
+        Cells(i, 2) = trainingFolder
+        trainingFolder = Dir()
+        i = i + 1
+    Loop
+    
+    AppNum = Range("B2").End(xlDown).Row - 1
+    Set CurrentWS = ActiveSheet
+    For i = 1 To AppNum
+        
+        If CurrentWS.Name = "Menu" Then
+            Worksheets.Add after:=Sheets("Menu")
+        Else
+            Worksheets.Add after:=CurrentWS
+        End If
+        
+        If ActiveSheet.Name <> "Menu" Then
+                ActiveSheet.Name = Sheets("Menu").Cells(i + 1, 2)
+        End If
+
+        Set CurrentWS = ActiveSheet
+        Range("B1") = CurrentWS.Name
+        
+        MenuSheet.Cells(i + 1, 3) = Dir(ThisWorkbook.Path & "\Data\" & Range("B1") _
+        + "\photos\icon\*.*")
+        
+        Call setUpSheet
+        Call SortByFullName
+        Call CreateJsonFromExcel
+        
+    Next
+    
+    Sheets("Menu").Activate
+End Sub
+
+Sub SortByFullName()
+    
+    Range("B3").CurrentRegion.Offset(2, 0).Sort _
+        key1:=Range("B2"), _
+        order1:=xlAscending
+End Sub
+Sub createMenu()
+    Dim trainingFolder As String
+    Dim trainingJson As String
+    Dim currentPath As String
+    Dim i As Integer
+    
+    i = 2
+    trainingFolder = Cells(i, 2)
+    If trainingFolder <> "" Then
+        
+        
+        currentPath = ThisWorkbook.Path & "\Data\" _
+                        & trainingFolder
+        trainingJson = Dir(currentPath & "\*.json")
+        If ThisWorkbook.Path & "\training.json" <> "" Then
+            Open ThisWorkbook.Path & "\training.json" For Output As #2
+                Call WriteDownMenu(trainingJson)
+            Close #2
+        Else
+            MsgBox ("Cannot find Training Path")
+        End If
+    End If
+    
+   
+End Sub
+Sub setUpSheet()
+    Call Init
+    Call ReadFiles
+End Sub
+
+Sub Init()
+    Range("A1") = "Training Name"
+    
+    'Range("A2") = "ID"
+    Range("B2") = "FullName"
+    Range("C2") = "Name"
+    Range("D2") = "Type"
+    Range("E2") = "Is360View"
+    Range("F2") = "Width"
+    Range("G2") = "Height"
+    
+End Sub
+
+Sub ReadFiles()
+
+    Dim trainingName As String
+    Dim bookname As String
+    Dim FilePath As String
+    Dim rowNum As Integer
+    Dim Sum, photos_1, texts_2, movies_4, models_8, musics_16 As Integer
+        Sum = 0
+        photos_1 = 1
+        texts_2 = 2
+        movies_4 = 4
+        models_8 = 8
+        musics_16 = 16
+        
+    rowNum = 3
+    trainingName = Range("B1")
+    Do While Sum <> 31
+        bookname = ReadBookName(Sum, trainingName, bookname)(0)
+        FilePath = ReadBookName(Sum, trainingName, bookname)(1)
+        
+        'Comment Out
+        
+        'If bookname = "" Then Stop
+    
+        
+        
+        Do While bookname <> ""
+            If Right(bookname, 4) <> "meta" Then
+                'Cells(rowNum, 1) = rowNum - 2
+                Cells(rowNum, 2) = CStr(bookname)
+                Cells(rowNum, 3) = CStr(nameOfFile(bookname))
+                Cells(rowNum, 4) = CStr(typeOfFile(bookname))
+                Cells(rowNum, 5) = Is360view(nameOfFile(bookname))
+                
+                Call Photos(bookname, FilePath, rowNum)
+                rowNum = rowNum + 1
+            End If
+            bookname = Dir()
+        Loop
+        Sum = fileChange(Sum)
+    Loop
+End Sub
+
+Function fileChange(Sum)
+
+        Select Case Sum
+            Case 0
+                Sum = Sum + 1
+                 
+            Case 1
+                Sum = Sum + 2
+                 
+            Case 3
+                Sum = Sum + 4
+                 
+            Case 7
+                Sum = Sum + 8
+                 
+            Case 15
+                Sum = Sum + 16
+        End Select
+        fileChange = Sum
+        
+End Function
+
+Function ReadBookName(Sum, tName, bName)
+    Dim fPath As String
+    Select Case Sum
+        Case 0
+            bName = Dir(ThisWorkbook.Path & "\Data\" & tName + "\photos\*.*")
+            fPath = ThisWorkbook.Path & "\Data\" & tName + "\photos\"
+        Case 1
+            bName = Dir(ThisWorkbook.Path & "\Data\" & tName + "\texts\*.*")
+             fPath = ThisWorkbook.Path & "\Data\" & tName + "\texts\"
+        Case 3
+            bName = Dir(ThisWorkbook.Path & "\Data\" & tName + "\movies\*.*")
+            fPath = ThisWorkbook.Path & "\Data\" & tName + "\movies\"
+        Case 7
+            bName = Dir(ThisWorkbook.Path & "\Data\" & tName + "\models\*.*")
+            fPath = ThisWorkbook.Path & "\Data\" & tName + "\models\"
+        Case 15
+            bName = Dir(ThisWorkbook.Path & "\Data\" & tName + "\musics\*.*")
+    End Select
+    
+    
+    ReadBookName = Array(bName, fPath)
+End Function
+
+Function Is360view(filename)
+    If Right(filename, 4) = "_360" Then
+        Is360view = True
+    Else
+        Is360view = False
+    End If
+End Function
+Function ReadFolder()
+    Dim countTillThree As Integer
+    Dim t_name As String
+    countTillThree = 0
+    t_name = Dir(ThisWorkbook.Path & "\Data\" & "*", vbDirectory)
+    
+    Do While (t_name = "." Or t_name = "..") And countTillThree < 3
+     t_name = Dir()
+     Loop
+    
+    ReadFolder = t_name
+   
+End Function
+Function nameOfFile(fullname As String)
+    nameOfFile = Left(fullname, InStr(fullname, ".") - 1)
+End Function
+
+Function typeOfFile(fullname As String)
+    Dim lengthOfFullname As Integer
+    Dim lengthOfTypeName As Integer
+    
+    lengthOfFullname = Len(fullname)
+    lengthOfTypeName = Len(fullname) - InStr(fullname, ".")
+    typeOfFile = Right(fullname, lengthOfTypeName)
+End Function
+
+Sub CreateJsonFromExcel()
+    Dim trainingTitle As String
+    Dim trainingTitleDotJson As String
+    Dim trainingPath As String
+
+    trainingTitle = Range("B1")
+    
+    If trainingTitle <> "" And Range("B3") <> "" Then
+        Dim yesORno As VbMsgBoxResult
+      '  yesORno = MsgBoxYesOrNo("Do you want to create " & trainingTitle & " ?")
+        yesORno = vbYes
+        If yesORno = vbYes Then
+        
+            trainingTitleDotJson = trainingTitle & ".json"
+            trainingPath = ThisWorkbook.Path & "\Data\" & _
+            trainingTitle & "\json\" + trainingTitleDotJson
+            If trainingPath <> "" Then
+                Open trainingPath For Output As #1
+                    Call writeDownTraining(trainingTitle)
+                
+                Close #1
+            Else
+                MsgBox ("Cannot find Training Path")
+            End If
+        End If
+    End If
+    
+End Sub
+
+Function MsgBoxYesOrNo(message)
+    MsgBoxYesOrNo = MsgBox(message, vbYesNo + vbQuestion)
+End Function
+Sub WriteDownMenu(t_Json)
+    Dim s_Brk, f_Brk, Com, DQ As String
+        s_Brk = "{"
+        f_Brk = "}"
+        Com = ","
+        DQ = Chr(34)
+    Dim AppNum, i As Integer
+        AppNum = Range("B2").End(xlDown).Row - 1
+        
+    Print #2, s_Brk
+    Call PlTabs_2(1)
+        Print #2, DQ & "app" & DQ & ": ["
+        Call PlTabs_2(2)
+            Print #2, s_Brk
+            Call PlTabs_2(3)
+                Print #2, DQ & "id" & DQ & ": " & 1 & Com
+            Call PlTabs_2(3)
+                Print #2, DQ & "title" & DQ & ": " & DQ & "training 1" & DQ & Com
+            Call PlTabs_2(3)
+                Print #2, DQ & "file" & DQ & ": " & DQ & t_Json & DQ & Com
+            Call PlTabs_2(3)
+                Print #2, DQ & "image" & DQ & ": " & DQ & Range("C2") & DQ & Com
+            Call PlTabs_2(3)
+                Print #2, DQ & "audio" & DQ & ": " & DQ & "dafault.wav" & DQ
+        Call PlTabs_2(2)
+            Print #2, f_Brk;
+    If AppNum > 1 Then
+        For i = 2 To AppNum
+            t_Json = Dir(ThisWorkbook.Path & "\Data\" & Cells(i + 1, 2) & "\*.json")
+            Print #2, Com
+             Call PlTabs_2(2)
+                Print #2, s_Brk
+                Call PlTabs_2(3)
+                    Print #2, DQ & "id" & DQ & ": " & i & Com
+                Call PlTabs_2(3)
+                    Print #2, DQ & "title" & DQ & ": " & DQ & "training " & i & DQ & Com
+                Call PlTabs_2(3)
+                    Print #2, DQ & "file" & DQ & ": " & DQ & t_Json & DQ & Com
+                Call PlTabs_2(3)
+                    Print #2, DQ & "image" & DQ & ": " & DQ & Cells(i + 1, 3) & DQ & Com
+                Call PlTabs_2(3)
+                    Print #2, DQ & "audio" & DQ & ": " & DQ & "dafault.wav" & DQ
+                Call PlTabs_2(2)
+                    If i = AppNum Then
+                        Print #2, f_Brk
+                    Else
+                        Print #2, f_Brk;
+                    End If
+                
+        Next
+    End If
+    Call PlTabs_2(1)
+        Print #2, "]"
+    Print #2, f_Brk
+End Sub
+
+Sub BoolFrenchToEnglish(cell)
+    Dim DQ, Com As String
+        Com = ","
+        DQ = Chr(34)
+    If LCase(cell) = "vrai" Then
+        Print #1, DQ & "Is360View" & DQ & ": true";
+        
+    ElseIf LCase(cell) = "faux" Then
+        
+        Print #1, DQ & "Is360View" & DQ & ": false";
+        
+    End If
+End Sub
+
+Sub writeDownTraining(trTitle)
+    Dim s_Brk, f_Brk, Com, DQ As String
+        s_Brk = "{"
+        f_Brk = "}"
+        Com = ","
+        DQ = Chr(34)
+    Dim AppNum, i As Integer
+        AppNum = Range("B1").End(xlDown).Row - 2
+       ' MsgBox ("The number of Applications is : " & AppNum)
+    Print #1, s_Brk
+    Call PlTabs_1(1)
+        Print #1, DQ & "title" & DQ & ": " & DQ & _
+                  trTitle & DQ & Com
+    Call PlTabs_1(1)
+        Print #1, DQ & "files" & DQ & ": ["
+        Call PlTabs_1(2)
+            Print #1, s_Brk
+            Call PlTabs_1(3)
+                Print #1, DQ & "id" & DQ & ": " & 1 & Com
+            Call PlTabs_1(3)
+                Print #1, DQ & "fullname" & DQ & ": " & DQ & Range("B3") & DQ & Com
+            Call PlTabs_1(3)
+                Print #1, DQ & "name" & DQ & ": " & DQ & Range("C3") & DQ & Com
+            Call PlTabs_1(3)
+                Print #1, DQ & "type" & DQ & ": " & DQ & Range("D3") & DQ & Com
+            Call PlTabs_1(3)
+                BoolFrenchToEnglish (Range("E3"))
+                
+            If Range("F3") <> "" Then
+                If Range("G3") <> "" Then
+                    Print #1, Com
+                    Call PlTabs_1(3)
+                        Print #1, DQ & "width" & DQ & ": " & Range("F3") & Com
+                    Call PlTabs_1(3)
+                        Print #1, DQ & "height" & DQ & ": " & Range("G3")
+                End If
+            Else
+                    Print #1, ""
+            End If
+            
+            
+                
+        Call PlTabs_1(2)
+            Print #1, f_Brk;
+    
+    For i = 2 To AppNum
+        Print #1, Com
+            Call PlTabs_1(2)
+                Print #1, s_Brk
+                Call PlTabs_1(3)
+                    Print #1, DQ & "id" & DQ & ": " & i & Com
+                Call PlTabs_1(3)
+                    Print #1, DQ & "fullname" & DQ & ": " & DQ & Cells(i + 2, 2) & DQ & Com
+                Call PlTabs_1(3)
+                    Print #1, DQ & "name" & DQ & ": " & DQ & Cells(i + 2, 3) & DQ & Com
+                Call PlTabs_1(3)
+                    Print #1, DQ & "type" & DQ & ": " & DQ & Cells(i + 2, 4) & DQ & Com
+                Call PlTabs_1(3)
+                    BoolFrenchToEnglish (Cells(i + 2, 5))
+                    
+            If Cells(i + 2, 6) <> "" Then
+                If Cells(i + 2, 7) <> "" Then
+                Print #1, Com
+                    Call PlTabs_1(3)
+                        Print #1, DQ & "width" & DQ & ": " & Cells(i + 2, 6) & Com
+                    Call PlTabs_1(3)
+                        Print #1, DQ & "height" & DQ & ": " & Cells(i + 2, 7)
+                Else
+                    MsgBox "Something is wrong."
+                End If
+            Else
+                    Print #1, ""
+            End If
+            
+            Call PlTabs_1(2)
+                If i = AppNum Then
+                    Print #1, f_Brk
+                Else
+                    Print #1, f_Brk;
+                End If
+    Next
+    
+    Call PlTabs_1(1)
+        Print #1, "]"
+    Print #1, f_Brk
+    
+End Sub
+
+Sub PlTabs_1(n)
+    Dim i As Integer
+    For i = 1 To n
+        Print #1, vbTab;
+    Next
+End Sub
+
+
+Sub PlTabs_2(n)
+    Dim i As Integer
+    For i = 1 To n
+        Print #2, vbTab;
+    Next
+End Sub
+
+
+
+
+
+
+
