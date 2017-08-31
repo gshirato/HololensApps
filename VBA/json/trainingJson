@@ -1,0 +1,88 @@
+{
+	"id": "fourchette",
+	"title": "Guide Utilisateur Fourchette",
+	"description": "Comment utiliser une fourchette efficacement ?\r\nDurée: 5 minutes.",
+	"image": "fourchette-animee-small.gif",
+	"start": "introduction",
+	"scenes": [
+		{
+			"id": "introduction",
+			"title": "Introduction",
+			"description": "La fourchette est un couvert de table ou un ustensile de cuisine permettant d'attraper les aliments, sans les toucher directement avec les doigts.",
+			"type": "image",
+			"image": "introduction.png",
+			"audio": "introduction.wav",
+			"duration": "30s",
+			"next_type": "Simple",
+			"next": "historique"
+		},
+		{
+			"id": "historique",
+			"title": "Historique",
+			"description": "La fourchette est une petite fourche. De longues fourchettes pour saisir les aliments existent depuis la Rome antique. Les fourchettes actuelles sont apparues dans l'Empire Byzantin, et sont arrivées vers 1056 en Italie, quand Théodora Doukas, la fille de Constantin Doukas, a été mariée au doge de Venise Domenico Selvo, et ont été diffusées comme une mode en Italie du Nord. L'ecclésiastique Pierre Damien blâme d'ailleurs ce raffinement apporté par la princesse byzantine.",
+			"type": "video",
+			"video": "historique.mpg",
+			"duration": "30s",
+			"next_type": "Simple",
+			"next": "usages_et_coutumes_1"
+		},
+		{
+			"id": "usages_et_coutumes_2",
+			"title": "Historique",
+			"description": "Lorsque l'on prépare une table pour un repas, on place habituellement la fourchette pointes vers le bas. Cette habitude vient de l'époque de la Renaissance, lorsque l'usage de la fourchette est apparu. En effet, les personnes riches et de la haute société faisaient graver leurs armoiries sur le dos du manche de la fourchette. Pour que celles-ci fussent visibles par tous les convives, on mettait donc les fourchettes pointes vers le bas.",
+			"type": "fbx",
+			"fbx": "usages_et_coutumes_1.fbx",
+			"audio": "usages_et_coutumes_1.wav",
+			"duration": "30s",
+			"next_type": "Simple",
+			"next": "types_de_fourchettes"
+		},
+		{
+			"id": "conclusion",
+			"title": "Conclusion",
+			"description": "Nous espérons vous en avoir appris plus concernant les fourchettes.",
+			"type": "image",
+			"image": "introduction.png",
+			"audio": "introduction.wav",
+			"duration": "30s",
+			"next_type": "Simple",
+			"next": "end"
+		},
+		{
+			"id": "types_de_fourchettes",
+			"title": "Historique",
+			"description": "TODO",
+			"type": "image",
+			"image": "types_de_fourchettes.png",
+			"audio": "types_de_fourchettes.wav",
+			"duration": "30s",
+			"next_type": "Option",
+			"choices_title": "Où souhaitez-vous aller ?",
+			"choices": [
+				{
+					"title": "A. FOURCHETTE CLASSIQUE",
+					"next": "conclusion"
+				},
+				{
+					"title": "B. FOURCHETTE RONDE",
+					"next": "conclusion"
+				},
+				{
+					"title": "C. FOURCHETTE CARREE",
+					"next": "conclusion"
+				}
+			]
+		},
+		{
+			"id": "usages_et_coutumes_1",
+			"title": "Historique",
+			"description": "Lorsque l'on prépare une table pour un repas, on place habituellement la fourchette pointes vers le bas. Cette habitude vient de l'époque de la Renaissance, lorsque l'usage de la fourchette est apparu. En effet, les personnes riches et de la haute société faisaient graver leurs armoiries sur le dos du manche de la fourchette. Pour que celles-ci fussent visibles par tous les convives, on mettait donc les fourchettes pointes vers le bas.",
+			"type": "bundle",
+			"bundle": "usages_et_coutumes",
+			"audio": "usages_et_coutumes.wav",
+			"duration": "30s",
+			"next_type": "Simple",
+			"next": "usages_et_coutumes_2"
+		}
+	]
+}
